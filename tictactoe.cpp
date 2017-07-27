@@ -3,7 +3,6 @@
 #include <string>
 #include <conio.h>
 
-#include "windows.h"
 #include "Board.hpp"
 
 using std::cout;
@@ -12,7 +11,7 @@ using std::endl;
 using std::string;
 
 void draw (string option = "normal");
-bool update ();
+void update ();
 void updatePlayer ();
 void hasWon ();
 
@@ -28,7 +27,7 @@ main ()
   while (true)
   {
     draw ();
-    update()
+    update();
     hasWon();
     updatePlayer();
   }
@@ -40,9 +39,9 @@ draw (string option)
   if (option != "help") { system("cls"); }
   if (option == "start")
   {
-    cout << endl << " TIC - TAC - TOE" << endl
-	 << "type \"h\" at any time for instructions" << endl
-	 << "or type \"q\" at any time to exit" << endl;
+    cout << endl << "xo TIC - TAC - TOE xo" << endl
+	 << "type \"h\" once in game for instructions" << endl
+	 << "or type \"q\" once in game to exit" << endl;
    system("pause");
    return;
   }
@@ -50,14 +49,11 @@ draw (string option)
   {
     cout << "          ~~~~~~~HELP~~~~~~~" << endl
          << "COMMANDS:" << endl
-         << "Help: \"h\" \"help\"" << endl
-         << "Play: \"p\" \"play\" \"y\" \"yes\"" << endl
-         << "Quit: \"quit\" (or \"n\"/\"no\" when prompted to play)" << endl
-         << "Placing a mark~" << endl
-         << "type row then column separated by a SPACE" << endl
-         << "ROWS   : top, middle, bottom" << endl
-         << "COLUMNS: left, middle, right" << endl
-         << "Alternatively, type center for middle-middle" << endl << endl;
+         << "Help: \"h\"" << endl
+         << "Quit: \"q\"" << endl
+         << "HOW TO PLACE A MARK:" << endl
+         << "Type a number 1-9 (preferably on num-pad) for corresponding space:" << endl;
+    board.printSample();
     system("pause");
     system("cls");
   }
@@ -104,7 +100,6 @@ update ()
     }
     break;
   }
-  return false;
 }
 
 void
