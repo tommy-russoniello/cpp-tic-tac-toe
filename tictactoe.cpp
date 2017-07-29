@@ -4,6 +4,7 @@
 #include <conio.h>
 
 #include "board.h"
+#include "clearscreen.h"
 
 using std::cout;
 using std::cin;
@@ -13,7 +14,7 @@ using std::string;
 void draw (string option = "normal");
 void update ();
 void updatePlayer ();
-void hasWon ();
+void gameOver ();
 
 Board board;
 char player = 'X';
@@ -29,7 +30,7 @@ main ()
     draw ();
     update();
     ++moveCount;
-    hasWon();
+    gameOver();
     updatePlayer();
   }
 }
@@ -37,15 +38,16 @@ main ()
 void
 draw (string option)
 {
-  if (option != "help") { system("cls"); }
+  if (option != "help") { ClearScreen(); }
 
   if (option == "start")
   {
     cout << endl << "xo TIC - TAC - TOE xo" << endl
-	 << "type \"h\" once in game for instructions" << endl
-	 << "or type \"q\" once in game to exit" << endl;
-   system("pause");
-   return;
+         << "type \"h\" once in game for instructions" << endl
+	       << "or type \"q\" once in game to exit" << endl
+         << "Press enter to continue...";
+    cin.get();
+    return;
   }
 
   if (option == "help")
@@ -57,8 +59,10 @@ draw (string option)
          << "HOW TO PLACE A MARK:" << endl
          << "Type a number 1-9 (preferably on num-pad) for corresponding space:" << endl;
     board.printSample();
-    system("pause");
-    system("cls");
+    cout << "Press enter to continue...";
+    cin.get();
+    cin.ignore();
+    ClearScreen();
   }
 
   board.print();
@@ -110,7 +114,7 @@ update ()
       break;
     }
 
-    // convert from char to corresponding integer
+    /* convert from char to corresponding integer */
     int moveNum = move - '0';
 
     if(!board.setValue(moveNum, player))
@@ -133,7 +137,7 @@ updatePlayer ()
 }
 
 void
-hasWon()
+gameOver()
 {
   if (board.hasWon())
   {

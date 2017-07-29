@@ -63,8 +63,6 @@ Board::hasWon ()
   return won;
 }
 
-
-
 bool
 Board::update (char xo, int pos)
 {
