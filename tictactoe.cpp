@@ -3,7 +3,7 @@
 #include <string>
 #include <conio.h>
 
-#include "Board.hpp"
+#include "board.h"
 
 using std::cout;
 using std::cin;
@@ -17,6 +17,7 @@ void hasWon ();
 
 Board board;
 char player = 'X';
+int moveCount = 0;
 
 int
 main ()
@@ -27,6 +28,7 @@ main ()
   {
     draw ();
     update();
+    ++moveCount;
     hasWon();
     updatePlayer();
   }
@@ -36,6 +38,7 @@ void
 draw (string option)
 {
   if (option != "help") { system("cls"); }
+
   if (option == "start")
   {
     cout << endl << "xo TIC - TAC - TOE xo" << endl
@@ -44,6 +47,7 @@ draw (string option)
    system("pause");
    return;
   }
+
   if (option == "help")
   {
     cout << "          ~~~~~~~HELP~~~~~~~" << endl
@@ -56,9 +60,22 @@ draw (string option)
     system("pause");
     system("cls");
   }
+
   board.print();
   if (option == "normal" || option == "help")
     cout << "Player " << player << " : Your Move..." << endl;
+
+  if (option == "win")
+  {
+    cout << "Player " << player << " is the winner!" << endl << endl;
+    exit(EXIT_SUCCESS);
+  }
+
+  if (option == "tie")
+  {
+    cout << "It's a tie!" << endl << endl;
+    exit (EXIT_SUCCESS);
+  }
 }
 
 void
@@ -93,7 +110,7 @@ update ()
       break;
     }
 
-    // convert rom char to corresponding integer
+    // convert from char to corresponding integer
     int moveNum = move - '0';
 
     if(!board.setValue(moveNum, player))
@@ -118,11 +135,13 @@ updatePlayer ()
 void
 hasWon()
 {
-  //TODO: Improve this function and add tie detection
-  if (board.won)
+  if (board.hasWon())
   {
-    draw ("win"); cout << "Player " << player << " is the winner!" << endl << endl; exit(EXIT_SUCCESS);
+    draw ("win");
   }
-  
+  if (moveCount == 9)
+  {
+    draw ("tie");
+  }
 }
 
