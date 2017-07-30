@@ -92,8 +92,6 @@ draw (string option)
 void
 update ()
 {
-  int position;
-  string input;
   char move;
   while (true)
   {
@@ -168,4 +166,3 @@ gameOver ()
     draw ("tie");
   }
 }
-
