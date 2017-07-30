@@ -1,15 +1,18 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
-#include <conio.h>
+#include <limits>
 
 #include "board.h"
 #include "clearscreen.h"
+#include "color.h"
 
 using std::cout;
 using std::cin;
 using std::endl;
 using std::string;
+using std::numeric_limits;
+using std::streamsize;
 
 void draw (string option = "normal");
 void update ();
@@ -23,22 +26,25 @@ int moveCount = 0;
 int
 main ()
 {
-  draw("start");
+  draw ("start");
 
   while (true)
   {
     draw ();
-    update();
+    update ();
     ++moveCount;
-    gameOver();
-    updatePlayer();
+    gameOver ();
+    updatePlayer ();
   }
 }
 
 void
 draw (string option)
 {
-  if (option != "help") { ClearScreen(); }
+  if (option != "help")
+  {
+    ClearScreen ();
+  }
 
   if (option == "start")
   {
@@ -46,7 +52,7 @@ draw (string option)
          << "type \"h\" once in game for instructions" << endl
 	       << "or type \"q\" once in game to exit" << endl
          << "Press enter to continue...";
-    cin.get();
+    cin.ignore (numeric_limits<streamsize>::max (), '\n');
     return;
   }
 
@@ -58,21 +64,22 @@ draw (string option)
          << "Quit: \"q\"" << endl
          << "HOW TO PLACE A MARK:" << endl
          << "Type a number 1-9 (preferably on num-pad) for corresponding space:" << endl;
-    board.printSample();
+    board.printSample ();
     cout << "Press enter to continue...";
-    cin.get();
-    cin.ignore();
-    ClearScreen();
+    cin.ignore (numeric_limits<streamsize>::max (), '\n');
+    ClearScreen ();
   }
 
-  board.print();
-  if (option == "normal" || option == "help")
-    cout << "Player " << player << " : Your Move..." << endl;
+  board.print ();
 
+  if (option == "normal" || option == "help")
+  {
+    cout << "Player " << player << " : Your Move..." << endl;
+  }
   if (option == "win")
   {
     cout << "Player " << player << " is the winner!" << endl << endl;
-    exit(EXIT_SUCCESS);
+    exit (EXIT_SUCCESS);
   }
 
   if (option == "tie")
@@ -92,8 +99,8 @@ update ()
   {
     while (true)
     {
-        cin >> input;
-        move = input[0];
+        cin.get (move);
+        cin.ignore (numeric_limits<streamsize>::max (), '\n');
         switch (move)
         {
           case '1' : break;
@@ -106,10 +113,19 @@ update ()
           case '8' : break;
           case '9' : break;
 
-          case 'q' : exit(EXIT_SUCCESS); break;
+          case 'q' : exit (EXIT_SUCCESS);   break;
           case 'h' : draw ("help");      continue;
 
-          default  : cout << "Command Not Recognized\n"; continue;
+          default  : 
+            draw ();
+            RedOnBlack ();
+            if (move == '\n')
+            {
+              move = ' ';
+            }
+            cout << "Command \"" << move << "\" Not Recognized\n"; 
+            ResetColors ();
+            continue;
         }
       break;
     }
@@ -117,7 +133,7 @@ update ()
     /* convert from char to corresponding integer */
     int moveNum = move - '0';
 
-    if(!board.setValue(moveNum, player))
+    if (!board.setValue (moveNum, player))
     {
       draw ();
       cout << "Space already taken\n";
@@ -131,15 +147,19 @@ void
 updatePlayer ()
 {
   if (player == 'X')
+  {
     player = 'O';
+  }
   else
+  {
     player = 'X';
+  }
 }
 
 void
-gameOver()
+gameOver ()
 {
-  if (board.hasWon())
+  if (board.hasWon ())
   {
     draw ("win");
   }

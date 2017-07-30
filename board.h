@@ -11,6 +11,7 @@ class Board
 
   bool won;
   char spaces [10];
+  vector<int> winningRow;
   vector<int> movesX;
   vector<int> movesO;
 
@@ -21,12 +22,13 @@ class Board
   void centerCheck (vector<int>& moves);
   int opposite (int pos);
   bool vfind (vector<int> vec, int num);
+  void printSpace (int space);
 
   public:
 
   Board ();
   void print ();
-  void printSample();
+  void printSample ();
   bool setValue (int pos, char xo);
   bool hasWon ();
 };

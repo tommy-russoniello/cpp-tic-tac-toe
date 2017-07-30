@@ -3,6 +3,6 @@
 #ifndef CLEARSCREEN_H
 #define CLEARSCREEN_H
 
-void ClearScreen();
+void ClearScreen ();
 
 #endif 
