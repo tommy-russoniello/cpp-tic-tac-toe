@@ -64,7 +64,7 @@ if (!cur_term)
     }
   }
 
-putp (tigetstr ("clear"));
+putp (tigetstr ((char *) "clear"));
 }
 
 #endif

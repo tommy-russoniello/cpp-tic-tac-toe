@@ -24,6 +24,10 @@ GreenOnBlack ()
 
 #else
 
+#include <iostream>
+
+using std::cout;
+
 void
  ResetColors ()
 {
