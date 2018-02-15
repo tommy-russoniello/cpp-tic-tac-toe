@@ -8,6 +8,8 @@ Later, I decided to add some revisions to it, while still keeping its original f
 The game is designed to be played by entering numbers on the numpad to mark the
  corresponding spaces on the board. It works on both Windows and UNIX operating
  systems.
+ 
+Includes both a 2-player mode and a 1-player mode against a bot opponent that is able to play as either Xs or Os.
 
 For Mac OSX, compile with `-lncurses` for proper
 screen clearing.
