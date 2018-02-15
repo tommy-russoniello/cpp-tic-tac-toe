@@ -1,18 +1,24 @@
+#include <algorithm>
+#include <ctime>
 #include <iostream>
+#include <random>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include "board.h"
 #include "color.h"
 
 using std::cout;
 using std::endl;
-using std::vector;
 using std::find;
+using std::make_pair;
+using std::pair;
+using std::remove;
+using std::vector;
 
 Board::Board () : won (false)
 {
+  gen.seed (time (NULL));
   for (int i = 0; i < 9; ++i)
   {
     spaces [i] = ' ';
@@ -78,10 +84,94 @@ Board::hasWon ()
   return won;
 }
 
+void
+Board::autoMove (char xo)
+{
+  if (xo == 'X')
+  {
+    if (movesX.size () < 2)
+    {
+      update ('X', randomOpenCorner ());
+      return;
+    }
+    else
+    {
+      auto oneAwayX = oneAway ('X');
+      if (oneAwayX.first)
+      {
+        update ('X', oneAwayX.second);
+        return;
+      }
+
+      auto oneAwayO = oneAway ('O');
+      if (oneAwayO.first)
+      {
+        update ('X', oneAwayO.second);
+        return;
+      }
+
+      if (!update ('X', randomOpenCorner ()))
+      {
+        vector<int> openSpaces = allOpenSpaces ();
+
+        update ('X', openSpaces [gen () % openSpaces.size ()]);
+        return;
+      }
+    }
+  }
+  else
+  {
+    if (movesO.empty ())
+    {
+      if (movesX [0] == 2 || movesX [0] == 4 || movesX[ 0] == 6 || movesX [0] == 8)
+      {
+        update ('O', opposite (movesX [0]));
+        return;
+      }
+      if (!update ('O', 5))
+      {
+        update ('O', randomOpenCorner ());
+      }
+      return;
+    }
+    else if (movesO.size () == 1 && movesX [1] == opposite (movesX [0]))
+    {
+      vector<int> mids { 2, 4, 6, 8 };
+
+      update ('O', mids [gen () % mids.size ()]);
+      return;
+    }
+    else
+    {
+      auto oneAwayO = oneAway ('O');
+      if (oneAwayO.first)
+      {
+        update ('O', oneAwayO.second);
+        return;
+      }
+
+      auto oneAwayX = oneAway ('X');
+      if (oneAwayX.first)
+      {
+        update ('O', oneAwayX.second);
+        return;
+      }
+
+      if (!update ('O', randomOpenCorner ()))
+      {
+        vector<int> openSpaces = allOpenSpaces ();
+
+        update ('O', openSpaces [gen () % openSpaces.size ()]);
+        return;
+      }
+    }
+  }
+}
+
 bool
 Board::update (char xo, int pos)
 {
-  if (!isspace (spaces [pos - 1]))
+  if (pos < 1 || !isspace (spaces [pos - 1]))
   {
     return false;
   }
@@ -104,6 +194,32 @@ Board::update (char xo, int pos)
     }
   }
   return true;
+}
+
+void
+Board::clearSpace (int pos)
+{
+  char xo = spaces [pos - 1];
+  if (isspace (xo))
+  {
+    return;
+  }
+  else if (xo == 'X')
+  {
+    movesX.erase (remove (movesX.begin (), movesX.end (), pos), movesX.end ());
+  }
+  else if (xo == 'O')
+  {
+    movesO.erase (remove (movesO.begin (), movesO.end (), pos), movesO.end ());
+  }
+
+  spaces [pos - 1] = ' ';
+
+  if (vfind (winningRow, pos))
+  {
+    winningRow.clear ();
+    won = false;
+  }
 }
 
 void
@@ -246,4 +362,67 @@ Board::printSpace (int space)
   {
     cout << spaces [space];
   }
+}
+
+pair <bool, int>
+Board::oneAway (char xo)
+{
+  vector<int> openSpaces = allOpenSpaces ();
+
+  for (int i : openSpaces)
+  {
+    update (xo, i);
+    if (won)
+    {
+      clearSpace (i);
+      return make_pair (true, i);
+    }
+
+    clearSpace (i);
+  }
+
+  return make_pair (false, -1);
+}
+
+vector<int>
+Board::allOpenSpaces ()
+{
+  vector<int> openSpaces;
+  for (int i = 1; i < 10; ++i)
+  {
+    if (isspace (spaces [i - 1]))
+    {
+      openSpaces.push_back (i);
+    }
+  }
+
+  return openSpaces;
+}
+
+int
+Board::randomOpenCorner ()
+{
+  vector<int> openCorners;
+  if (isspace (spaces [0]))
+  {
+    openCorners.push_back (1);
+  }
+  if (isspace (spaces [2]))
+  {
+    openCorners.push_back (3);
+  }
+  if (isspace (spaces [6]))
+  {
+    openCorners.push_back (7);
+  }
+  if (isspace (spaces [8]))
+  {
+    openCorners.push_back (9);
+  }
+  if (openCorners.empty ())
+  {
+    return -1;
+  }
+
+  return openCorners [gen () % openCorners.size ()];
 }

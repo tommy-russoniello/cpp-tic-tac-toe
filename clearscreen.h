@@ -3,6 +3,7 @@
 #ifndef CLEARSCREEN_H
 #define CLEARSCREEN_H
 
+// Clears command line screen.
 void ClearScreen ();
 
-#endif 
+#endif

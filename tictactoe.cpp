@@ -1,59 +1,131 @@
-#include <iostream>
 #include <cstdlib>
-#include <string>
+#include <iostream>
 #include <limits>
+#include <string>
 
 #include "board.h"
 #include "clearscreen.h"
 #include "color.h"
 
-using std::cout;
 using std::cin;
+using std::cout;
 using std::endl;
-using std::string;
 using std::numeric_limits;
 using std::streamsize;
+using std::string;
 
+void intro ();
 void draw (string option = "normal");
 void update ();
 void updatePlayer ();
 void gameOver ();
 
 Board board;
-char player = 'X';
+char player = 'X', autoPlayer;
 int moveCount = 0;
 
 int
 main ()
 {
-  draw ("start");
+  intro ();
 
   while (true)
   {
     draw ();
-    update ();
+    if (autoPlayer == player)
+    {
+      board.autoMove (player);
+    }
+    else
+    {
+      update ();
+    }
+
     ++moveCount;
     gameOver ();
     updatePlayer ();
   }
 }
 
+// Displays intro message and handles user input to set up desired play settings.
+void
+intro ()
+{
+  ClearScreen ();
+
+  string introMessage = "\nxo TIC - TAC - TOE xo\n"
+    "type \"h\" once in game for instructions\n"
+    "or type \"q\" at any time to exit\n"
+    "Press enter to continue...\n";
+
+  cout << introMessage;
+
+  char input;
+  cin.get (input);
+
+  if (input == 'q')
+  {
+    exit (EXIT_SUCCESS);
+  }
+  else if (input != '\n')
+  {
+    cin.ignore (numeric_limits<streamsize>::max (), '\n');
+  }
+
+  cout << "1 or 2 players? (enter the number 1 or 2)" << endl;
+  while (true)
+  {
+    cin.get (input);
+    cin.ignore (numeric_limits<streamsize>::max (), '\n');
+    switch (input)
+    {
+      case '1' :
+        ClearScreen ();
+        cout << introMessage << endl << "Do you want to be (X)s or (O)s? (X goes first)" << endl;
+        while (true)
+        {
+          cin.get (input);
+          cin.ignore (numeric_limits<streamsize>::max (), '\n');
+          switch (input)
+          {
+            case 'x' : case 'X' : autoPlayer = 'O'; break;
+            case 'o' : case 'O' : autoPlayer = 'X'; break;
+            case 'q' : exit (EXIT_SUCCESS);         break;
+            default  :
+              ClearScreen ();
+              cout << introMessage << endl << "Do you want to be (X)s or (O)s? (X goes first)" << endl;
+              RedOnBlack ();
+              cout << "Enter 'x'/'X' to be player X or 'o'/'O' to be player O." << endl;
+              ResetColors ();
+              continue;
+          }
+
+          break;
+        }
+
+        break;
+      case '2' : autoPlayer = ' ';    break;
+      case 'q' : exit (EXIT_SUCCESS); break;
+      default  :
+        ClearScreen ();
+        cout << introMessage << endl << "1 or 2 players? (enter the number 1 or 2)\n";
+        RedOnBlack ();
+        cout << "Enter '1' for 1-player or '2' for 2-player.\n";
+        ResetColors ();
+        continue;
+    }
+
+    break;
+  }
+}
+
+// Prints current state of board including any extra messages depending on given option.
 void
 draw (string option)
 {
   if (option != "help")
   {
     ClearScreen ();
-  }
-
-  if (option == "start")
-  {
-    cout << endl << "xo TIC - TAC - TOE xo" << endl
-         << "type \"h\" once in game for instructions" << endl
-	       << "or type \"q\" once in game to exit" << endl
-         << "Press enter to continue...";
-    cin.ignore (numeric_limits<streamsize>::max (), '\n');
-    return;
   }
 
   if (option == "help")
@@ -89,6 +161,7 @@ draw (string option)
   }
 }
 
+// Handles user input to take in a move and update the board accordingly.
 void
 update ()
 {
@@ -114,14 +187,14 @@ update ()
           case 'q' : exit (EXIT_SUCCESS);   break;
           case 'h' : draw ("help");      continue;
 
-          default  : 
+          default  :
             draw ();
             RedOnBlack ();
             if (move == '\n')
             {
               move = ' ';
             }
-            cout << "Command \"" << move << "\" Not Recognized\n"; 
+            cout << "Command \"" << move << "\" Not Recognized\n";
             ResetColors ();
             continue;
         }
@@ -141,6 +214,7 @@ update ()
   }
 }
 
+// Updates player to be the next in the sequence (opposite of current player).
 void
 updatePlayer ()
 {
@@ -154,6 +228,7 @@ updatePlayer ()
   }
 }
 
+// Determines if game has been ended and takes correct course of action.
 void
 gameOver ()
 {
