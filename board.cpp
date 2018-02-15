@@ -87,6 +87,11 @@ Board::hasWon ()
 void
 Board::autoMove (char xo)
 {
+  // TODO: when O puts their first mark on a mid space, marking some corners (2 out of 3 for when O puts
+  // their mark on mid space adjacent to X's first mark and 1 out of 3 when O puts their mark in mid
+  // space NOT adjacent to X's first mark) can make a tie possible. Make the x bot always go for a
+  // corner that cannot result in a tie on it's second move. (this should make it impossible to tie
+  // the x bot without taking the middle first)
   if (xo == 'X')
   {
     if (movesX.size () < 2)
@@ -110,20 +115,21 @@ Board::autoMove (char xo)
         return;
       }
 
-      if (!update ('X', randomOpenCorner ()))
+      if (update ('X', randomOpenCorner ()))
       {
-        vector<int> openSpaces = allOpenSpaces ();
-
-        update ('X', openSpaces [gen () % openSpaces.size ()]);
         return;
       }
     }
+
+    vector<int> openSpaces = allOpenSpaces ();
+
+    update ('X', openSpaces [gen () % openSpaces.size ()]);
   }
   else
   {
     if (movesO.empty ())
     {
-      if (movesX [0] == 2 || movesX [0] == 4 || movesX[ 0] == 6 || movesX [0] == 8)
+      if (movesX [0] == 2 || movesX [0] == 4 || movesX [0] == 6 || movesX [0] == 8)
       {
         update ('O', opposite (movesX [0]));
         return;
@@ -141,6 +147,40 @@ Board::autoMove (char xo)
       update ('O', mids [gen () % mids.size ()]);
       return;
     }
+    else if (movesO [0] == opposite (movesX [0]) && movesO.size () == 2 && spaces [4] == ' ')
+    {
+      update ('O', 5);
+      return;
+    }
+    else if (
+      movesO [0] == opposite (movesX [0]) &&
+      movesO.size () == 1 &&
+      (movesX [1] == 2 || movesX [1] == 4 || movesX [1] == 6 || movesX [1] == 8)
+    )
+    {
+      int biggerMid, smallerMid;
+      if (movesX [0] > movesX [1])
+      {
+        biggerMid = movesX [0];
+        smallerMid = movesX [1];
+      }
+      else
+      {
+        biggerMid = movesX [1];
+        smallerMid = movesX [0];
+      }
+
+      if (movesX [0] == 2 || movesX [1] == 2)
+      {
+        update ('O', biggerMid - smallerMid - 1);
+        return;
+      }
+      else
+      {
+        update ('O', 10 + (smallerMid - biggerMid) + 1);
+        return;
+      }
+    }
     else
     {
       auto oneAwayO = oneAway ('O');
@@ -157,14 +197,15 @@ Board::autoMove (char xo)
         return;
       }
 
-      if (!update ('O', randomOpenCorner ()))
+      if (update ('O', randomOpenCorner ()))
       {
-        vector<int> openSpaces = allOpenSpaces ();
-
-        update ('O', openSpaces [gen () % openSpaces.size ()]);
         return;
       }
     }
+
+    vector<int> openSpaces = allOpenSpaces ();
+
+    update ('O', openSpaces [gen () % openSpaces.size ()]);
   }
 }
 
