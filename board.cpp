@@ -163,43 +163,6 @@ Board::autoMove (char xo)
       }
       return;
     }
-    else if (movesX [1] == opposite (movesX [0]) && movesO.size () == 1)
-    {
-      vector<int> mids { 2, 4, 6, 8 };
-
-      update ('O', mids [gen () % mids.size ()]);
-      return;
-    }
-    else if (movesO [0] == opposite (movesX [0]) && movesO.size () == 1 && isMid (movesX [1]))
-    {
-      int biggerMid, smallerMid;
-      if (movesX [0] > movesX [1])
-      {
-        biggerMid = movesX [0];
-        smallerMid = movesX [1];
-      }
-      else
-      {
-        biggerMid = movesX [1];
-        smallerMid = movesX [0];
-      }
-
-      if (movesX [0] == 2 || movesX [1] == 2)
-      {
-        update ('O', biggerMid - smallerMid - 1);
-        return;
-      }
-      else
-      {
-        update ('O', 10 + (smallerMid - biggerMid) + 1);
-        return;
-      }
-    }
-    else if (movesO [0] == opposite (movesX [0]) && movesO.size () == 2 && spaces [4] == ' ')
-    {
-      update ('O', 5);
-      return;
-    }
     else
     {
       auto oneAwayO = oneAway ('O');
@@ -216,7 +179,52 @@ Board::autoMove (char xo)
         return;
       }
 
-      if (update ('O', randomOpenCorner ()))
+      if (movesX [1] == opposite (movesX [0]) && movesO.size () == 1)
+      {
+        vector<int> mids { 2, 4, 6, 8 };
+
+        update ('O', mids [gen () % mids.size ()]);
+        return;
+      }
+
+      if (movesO [0] == opposite (movesX [0]) && movesO.size () == 1 && isMid (movesX [1]))
+      {
+        int biggerMid, smallerMid;
+        if (movesX [0] > movesX [1])
+        {
+          biggerMid = movesX [0];
+          smallerMid = movesX [1];
+        }
+        else
+        {
+          biggerMid = movesX [1];
+          smallerMid = movesX [0];
+        }
+
+        if (movesX [0] == 2 || movesX [1] == 2)
+        {
+          update ('O', biggerMid - smallerMid - 1);
+          return;
+        }
+        else
+        {
+          update ('O', 10 + (smallerMid - biggerMid) + 1);
+          return;
+        }
+      }
+
+      if (movesO [0] == opposite (movesX [0]) && movesO.size () == 2 && spaces [4] == ' ')
+      {
+        update ('O', 5);
+        return;
+      }
+
+      if (!update ('O', 5))
+      {
+        update ('O', randomOpenCorner ());
+        return;
+      }
+      else
       {
         return;
       }
