@@ -63,6 +63,18 @@ class Board
   // Returns position of a random unmarked corner space.
   int randomOpenCorner ();
 
+  // Returns whether or not given position corresponds to a corner space.
+  bool isCorner (int pos);
+
+  // Returns whether or not given position corresponds to a mid space.
+  bool isMid (int pos);
+
+  // Returns whether or not given position corresponds to the center space.
+  bool isCenter (int pos);
+
+  // Returns whether or not given positions are adjacent to each other.
+  bool isAdjacent (int pos_a, int pos_b);
+
   public:
 
   Board ();

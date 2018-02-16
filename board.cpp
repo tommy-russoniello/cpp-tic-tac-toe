@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <ctime>
 #include <iostream>
 #include <random>
@@ -64,18 +65,18 @@ bool
 Board::setValue (int pos, char xo)
 {
   switch (pos)
-    {
-      case (7): return update (xo, 1);
-      case (8): return update (xo, 2);
-      case (9): return update (xo, 3);
-      case (4): return update (xo, 4);
-      case (5): return update (xo, 5);
-      case (6): return update (xo, 6);
-      case (1): return update (xo, 7);
-      case (2): return update (xo, 8);
-      case (3): return update (xo, 9);
-      default: return false; break;
-    }
+  {
+    case (7): return update (xo, 1);
+    case (8): return update (xo, 2);
+    case (9): return update (xo, 3);
+    case (4): return update (xo, 4);
+    case (5): return update (xo, 5);
+    case (6): return update (xo, 6);
+    case (1): return update (xo, 7);
+    case (2): return update (xo, 8);
+    case (3): return update (xo, 9);
+    default: return false;
+  }
 }
 
 bool
@@ -87,15 +88,30 @@ Board::hasWon ()
 void
 Board::autoMove (char xo)
 {
-  // TODO: when O puts their first mark on a mid space, marking some corners (2 out of 3 for when O puts
-  // their mark on mid space adjacent to X's first mark and 1 out of 3 when O puts their mark in mid
-  // space NOT adjacent to X's first mark) can make a tie possible. Make the x bot always go for a
-  // corner that cannot result in a tie on it's second move. (this should make it impossible to tie
-  // the x bot without taking the middle first)
   if (xo == 'X')
   {
     if (movesX.size () < 2)
     {
+      if (movesX.size () == 1)
+      {
+        if (isMid (movesO [0]))
+        {
+          if (isAdjacent (movesO [0], movesX [0]))
+          {
+            update ('X', opposite (movesO [0]) - (movesO [0] - movesX [0]));
+            return;
+          }
+
+          int oppositeFirstMoveX = opposite (movesX [0]);
+          if (isAdjacent (movesO [0], oppositeFirstMoveX))
+          {
+            spaces [oppositeFirstMoveX - 1] = 'X';
+            update ('X', randomOpenCorner ());
+            clearSpace (oppositeFirstMoveX);
+            return;
+          }
+        }
+      }
       update ('X', randomOpenCorner ());
       return;
     }
@@ -115,6 +131,13 @@ Board::autoMove (char xo)
         return;
       }
 
+      if (movesX.size () == 2 && isCorner (movesX [0]) && isCorner (movesX [1]) &&
+          isMid (movesO [0]) && isMid (movesO [1]))
+      {
+        update ('X', 5);
+        return;
+      }
+
       if (update ('X', randomOpenCorner ()))
       {
         return;
@@ -129,7 +152,7 @@ Board::autoMove (char xo)
   {
     if (movesO.empty ())
     {
-      if (movesX [0] == 2 || movesX [0] == 4 || movesX [0] == 6 || movesX [0] == 8)
+      if (isMid (movesX [0]))
       {
         update ('O', opposite (movesX [0]));
         return;
@@ -140,23 +163,14 @@ Board::autoMove (char xo)
       }
       return;
     }
-    else if (movesO.size () == 1 && movesX [1] == opposite (movesX [0]))
+    else if (movesX [1] == opposite (movesX [0]) && movesO.size () == 1)
     {
       vector<int> mids { 2, 4, 6, 8 };
 
       update ('O', mids [gen () % mids.size ()]);
       return;
     }
-    else if (movesO [0] == opposite (movesX [0]) && movesO.size () == 2 && spaces [4] == ' ')
-    {
-      update ('O', 5);
-      return;
-    }
-    else if (
-      movesO [0] == opposite (movesX [0]) &&
-      movesO.size () == 1 &&
-      (movesX [1] == 2 || movesX [1] == 4 || movesX [1] == 6 || movesX [1] == 8)
-    )
+    else if (movesO [0] == opposite (movesX [0]) && movesO.size () == 1 && isMid (movesX [1]))
     {
       int biggerMid, smallerMid;
       if (movesX [0] > movesX [1])
@@ -180,6 +194,11 @@ Board::autoMove (char xo)
         update ('O', 10 + (smallerMid - biggerMid) + 1);
         return;
       }
+    }
+    else if (movesO [0] == opposite (movesX [0]) && movesO.size () == 2 && spaces [4] == ' ')
+    {
+      update ('O', 5);
+      return;
     }
     else
     {
@@ -266,11 +285,11 @@ Board::clearSpace (int pos)
 void
 Board::checkIfWon (int pos, vector<int>& moves)
 {
-  if    (!(pos & 1))
+  if (isMid (pos))
   {
     midCheck (pos, moves);
   }
-  else if (pos != 5)
+  else if (isCorner (pos))
   {
     cornerCheck (pos, moves);
   }
@@ -466,4 +485,49 @@ Board::randomOpenCorner ()
   }
 
   return openCorners [gen () % openCorners.size ()];
+}
+
+bool
+Board::isCorner (int pos)
+{
+  return pos & 1 && pos != 5;
+}
+
+bool
+Board::isMid (int pos)
+{
+  return !(pos & 1);
+}
+
+bool
+Board::isCenter (int pos)
+{
+  return pos == 5;
+}
+
+bool
+Board::isAdjacent (int pos_a, int pos_b)
+{
+  if (pos_a > 9 || pos_a < 1 || pos_b > 9 || pos_b < 1 || pos_a == pos_b)
+  {
+    return false;
+  }
+
+  if (isCenter (pos_a) || isCenter (pos_b))
+  {
+    return true;
+  }
+
+  switch (pos_a)
+  {
+    case (1) : return pos_b == 2 || pos_b == 4;
+    case (2) : return pos_b < 7;
+    case (3) : return pos_b == 2 || pos_b == 6;
+    case (4) : return pos_b % 3 != 0;
+    case (6) : return pos_b % 3 != 1;
+    case (7) : return pos_b == 4 || pos_b == 8;
+    case (8) : return pos_b > 3;
+    case (9) : return pos_b == 6 || pos_b == 8;
+    default  : return false;
+  }
 }
