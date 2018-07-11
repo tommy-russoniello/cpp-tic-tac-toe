@@ -219,12 +219,7 @@ Board::autoMove (char xo)
         return;
       }
 
-      if (!update ('O', 5))
-      {
-        update ('O', randomOpenCorner ());
-        return;
-      }
-      else
+      if (update ('O', 5) || update ('O', randomOpenCorner ()))
       {
         return;
       }
